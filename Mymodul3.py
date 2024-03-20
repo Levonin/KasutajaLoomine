@@ -1,72 +1,50 @@
+login_password_list = [[], []]
+
 def kirjuta_failisse(fail: str):
-    """funktsioon kirjutab andmed failisse.
-    :param str fail:
-    :param list jarjend:
-    :rtype: list
-    """
-
     with open(fail, "w", encoding="utf-8") as f:
-        logins_to_string = ",".join(login_password_list[0])
-        f.write(logins_to_string)
+        if login_password_list[0]:  # Check if there's at least one login
+            f.write(",".join(login_password_list[0]))
         f.write("\n")
-        password_to_string = ",".join(login_password_list[1])
-        f.write(password_to_string)
+        if login_password_list[1]:  # Check if there's at least one password
+            f.write(",".join(login_password_list[1]))
+
+def lisamine_failisse(fail: str, login, parool: str):
+    global login_password_list
+    # Directly append the new login and password to the global list
+    login_password_list[0].append(login)
+    login_password_list[1].append(parool)
+    # Now write the updated list back to the file
+    kirjuta_failisse(fail)
 
 
-def lisamine_failisse(fail: str, login,parool:str):
-    """funktsioon kirjutab andmed failisse.
-    :param str fail:
-    :param str login:
-    :param str parool:
-    :rtype: list
-    """
-    with open(fail, "r", encoding="utf-8") as f:
-        lines = f.readlines()
-        logins_parools = [login,parool]
-        for index, line in enumerate(lines):
-            lines[index] = line.strip() + ',' + logins_parools[index]
-    with open(fail, "w", encoding="utf-8") as f:
-        f.write(lines[0])
-        f.write("\n")
-        f.write(lines[1])
-
-
-def loe_failist(fail: str) -> list:
-    f = open(fail, "r", encoding="utf-8")
-    jarjend = []
-    lines = f.readlines()
-    for rida in lines:
-        jarjend.append(rida.strip())
-
-
-    f.close()
-    logins = jarjend[0].split(",")
-    parools = jarjend[1].split(",")
-    login_password_list.append(logins)
-    login_password_list.append(parools)
+def loe_failist(fail: str):
+    global login_password_list
+    try:
+        with open(fail, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            if len(lines) >= 2:
+                login_password_list[0] = lines[0].strip().split(",")
+                login_password_list[1] = lines[1].strip().split(",")
+            else:
+                login_password_list = [[], []]  # Reset if file is empty or malformed
+    except FileNotFoundError:
+        login_password_list = [[], []]  # Reset if file does not exist
+# Alusta tühjade listidega
+login_password_list = [[], []]
+loe_failist("login_parool.txt")
 def andmete_uuendamine():
     login_password_list.clear()
     login_password_list.append(loe_failist("login_parool.txt"))
 
 login_password_list = []
 loe_failist("login_parool.txt")
-def register(login: str, password: str, ) -> any:
-    """
-    funktsioon registreerib uue kasutaja
-    Args:
-        login (str): kasutaja nimi
-        password (str): kasutaja parool
-    :rtype: any
-    """
-    # vaaatame kas kasutaja nimi on juba olemas
+def register(login: str, password: str):
+    global login_password_list
     if login in login_password_list[0]:
-        print("kasutaja nimi on juba olemas!")
-    # loome uue kasutaja nime ja parooli
+        print("Kasutajanimi on juba olemas!")
+        return None  # Or another appropriate response
     lisamine_failisse("login_parool.txt", login, password)
-    andmete_uuendamine()
-    print(login_password_list[0])
-    # printime edukat registreerimist
-    print("kasutaja registreeritud edukalt!")
+    print("Kasutaja registreeritud edukalt!")
     return login_password_list[0].index(login)
 
 
